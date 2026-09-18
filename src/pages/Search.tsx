@@ -67,183 +67,6 @@ const INITIAL_FILTERS: SearchFilters = {
   availability: "",
 };
 
-type SavedCaregiver = {
-  id?: string | number;
-  name?: string;
-  email?: string;
-  phone?: string;
-  city?: string;
-  expertise?: string | string[];
-  experience?: string | number;
-  price?: string | number;
-  services?: string[];
-  languages?: string[];
-  days?: string[];
-  startTime?: string;
-  endTime?: string;
-  photo?: string | null;
-  bio?: string;
-  qualifications?: string;
-  rating?: number;
-  reviews?: number;
-  verified?: boolean;
-};
-
-function getTodayName() {
-  return new Intl.DateTimeFormat("en-IN", {
-    weekday: "long",
-  }).format(new Date());
-}
-
-function getTomorrowName() {
-  const tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-
-  return new Intl.DateTimeFormat("en-IN", {
-    weekday: "long",
-  }).format(tomorrow);
-}
-
-function getAvailability(days: string[] = []): Availability {
-  const normalizedDays = days.map((day) => day.trim().toLowerCase());
-  const today = getTodayName().toLowerCase();
-  const tomorrow = getTomorrowName().toLowerCase();
-
-  if (normalizedDays.includes(today)) {
-    return "Available today";
-  }
-
-  if (normalizedDays.includes(tomorrow)) {
-    return "Available tomorrow";
-  }
-
-  const weekdays = ["monday", "tuesday", "wednesday", "thursday", "friday"];
-  const weekends = ["saturday", "sunday"];
-
-  if (
-    normalizedDays.length > 0 &&
-    weekdays.every((day) => normalizedDays.includes(day))
-  ) {
-    return "Weekdays";
-  }
-
-  if (
-    normalizedDays.length > 0 &&
-    weekends.every((day) => normalizedDays.includes(day))
-  ) {
-    return "Weekends";
-  }
-
-  return "Weekdays";
-}
-
-function getRegisteredCaregivers(): Caregiver[] {
-  try {
-    const saved = localStorage.getItem("careconnect_caregivers");
-
-    if (saved) {
-      const caregivers = JSON.parse(saved);
-
-      if (!Array.isArray(caregivers)) {
-        return [];
-      }
-
-      return caregivers
-        .map((caregiver: SavedCaregiver) => {
-          if (!caregiver.name || !caregiver.city) {
-            return null;
-          }
-
-          const expertise = Array.isArray(caregiver.expertise)
-            ? caregiver.expertise[0]
-            : caregiver.expertise;
-
-          if (
-            !expertise ||
-            !SPECIALIZATIONS.includes(expertise as Specialization)
-          ) {
-            return null;
-          }
-
-          const id = String(
-            caregiver.id ??
-              caregiver.email ??
-              caregiver.phone ??
-              "registered-caregiver"
-          );
-
-          return {
-            id,
-            name: caregiver.name.trim(),
-            specialization: expertise as Specialization,
-            location: caregiver.city.trim(),
-            experience: Number(caregiver.experience) || 0,
-            rating: Number(caregiver.rating) || 0,
-            reviews: Number(caregiver.reviews) || 0,
-            price: Number(caregiver.price) || 0,
-            availability: getAvailability(caregiver.days),
-            image: caregiver.photo || "",
-            verified: Boolean(caregiver.verified),
-          };
-        })
-        .filter(
-          (caregiver): caregiver is Caregiver => caregiver !== null
-        );
-    }
-
-    // Fallback for older registrations
-    const previous = localStorage.getItem(
-      "careconnect_current_caregiver"
-    );
-
-    if (!previous) {
-      return [];
-    }
-
-    const caregiver = JSON.parse(previous) as SavedCaregiver;
-
-    if (!caregiver.name || !caregiver.city) {
-      return [];
-    }
-
-    const expertise = Array.isArray(caregiver.expertise)
-      ? caregiver.expertise[0]
-      : caregiver.expertise;
-
-    if (
-      !expertise ||
-      !SPECIALIZATIONS.includes(expertise as Specialization)
-    ) {
-      return [];
-    }
-
-    const id = String(
-      caregiver.id ??
-        caregiver.email ??
-        caregiver.phone ??
-        "registered-caregiver"
-    );
-
-    return [
-      {
-        id,
-        name: caregiver.name.trim(),
-        specialization: expertise as Specialization,
-        location: caregiver.city.trim(),
-        experience: Number(caregiver.experience) || 0,
-        rating: Number(caregiver.rating) || 0,
-        reviews: Number(caregiver.reviews) || 0,
-        price: Number(caregiver.price) || 0,
-        availability: getAvailability(caregiver.days),
-        image: caregiver.photo || "",
-        verified: Boolean(caregiver.verified),
-      },
-    ];
-  } catch {
-    return [];
-  }
-}
-
 function LocationIcon() {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -426,7 +249,6 @@ function Search() {
     useState<SortOption>("recommended");
 
   const [registeredCaregivers, setRegisteredCaregivers] = useState<Caregiver[]>([]);
-  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCaregivers = async () => {
@@ -461,8 +283,6 @@ function Search() {
       } catch (error) {
         console.error("Failed to load caregivers:", error);
         setRegisteredCaregivers([]);
-      } finally {
-        setLoading(false);
       }
     };
 

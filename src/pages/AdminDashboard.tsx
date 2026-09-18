@@ -8,7 +8,6 @@ import {
   IndianRupee,
   Star,
   Briefcase,
-  AlertTriangle,
   ArrowLeft,
   RefreshCw,
   Trash2,
