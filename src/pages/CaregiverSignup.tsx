@@ -350,7 +350,7 @@ function CaregiverSignup() {
 
      const registerData = await registerResponse.json().catch(() => ({}));
 
-     if (!registerResponse.ok) {
+     if (!registerResponse.ok && registerResponse.status !== 409) {
        throw new Error(
          registerData.message || "Caregiver account registration failed."
        );
