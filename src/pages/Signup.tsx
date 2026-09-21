@@ -24,7 +24,7 @@ function Signup() {
 
     try {
       const response = await fetch(
-        "http://localhost:5000/api/auth/register",
+       "https://care-connect-2-0-111.onrender.com/api/auth/register",
         {
           method: "POST",
           headers: {

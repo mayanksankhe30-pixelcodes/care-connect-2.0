@@ -61,7 +61,7 @@ function AdminDashboard() {
       setError("");
 
       const response = await fetch(
-        "http://localhost:5000/api/caregivers"
+        "https://care-connect-2-0-111.onrender.com/api/caregivers"
       );
 
       const data = await response.json();
@@ -228,7 +228,7 @@ function AdminDashboard() {
       }
 
       const response = await fetch(
-        `http://localhost:5000/api/admin/caregivers/${caregiverId}`,
+        `https://care-connect-2-0-111.onrender.com/api/admin/caregivers/${caregiverId}`,
         {
           method: "DELETE",
           headers: {

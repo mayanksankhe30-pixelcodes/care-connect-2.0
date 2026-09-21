@@ -8,7 +8,7 @@ const {
 } = require("../controllers/caregiverController");
 
 const {
-    addCaregiverDetails
+    addCaregiverDetailsd
 } = require("../controllers/caregiverDetailsController");
 
 const authMiddleware = require("../middleware/authMiddleware");

@@ -254,7 +254,7 @@ function Search() {
     const fetchCaregivers = async () => {
       try {
         const response = await fetch(
-          "http://localhost:5000/api/caregivers"
+          "https://care-connect-2-0-111.onrender.com/api/caregivers"
         );
 
         if (!response.ok) {

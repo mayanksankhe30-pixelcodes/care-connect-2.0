@@ -87,7 +87,7 @@ function CaregiverProfile() {
         }
 
         const response = await fetch(
-          `http://localhost:5000/api/caregivers/${numericId}`
+          `https://care-connect-2-0-111.onrender.com/api/caregivers/${numericId}`
         );
 
         const data = await response.json();

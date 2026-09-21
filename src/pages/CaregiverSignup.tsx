@@ -332,7 +332,7 @@ function CaregiverSignup() {
    try {
      // 1. Register caregiver account in the backend.
      const registerResponse = await fetch(
-       "http://localhost:5000/api/auth/register",
+       "https://care-connect-2-0-111.onrender.com/api/auth/register",
        {
          method: "POST",
          headers: {
@@ -358,7 +358,7 @@ function CaregiverSignup() {
 
      // 2. Login and obtain a fresh JWT.
      const loginResponse = await fetch(
-       "http://localhost:5000/api/auth/login",
+       "https://care-connect-2-0-111.onrender.com/api/auth/login",
        {
          method: "POST",
          headers: {
@@ -397,7 +397,7 @@ function CaregiverSignup() {
 
      // 3. Create the caregiver profile in MySQL.
      const caregiverResponse = await fetch(
-       "http://localhost:5000/api/caregivers",
+       "https://care-connect-2-0-111.onrender.com/api/caregivers",
        {
          method: "POST",
          headers: {
@@ -441,7 +441,7 @@ function CaregiverSignup() {
 
      // 4. Save services, expertise, languages and working days.
      const detailsResponse = await fetch(
-       `http://localhost:5000/api/caregivers/${caregiverId}/details`,
+       `https://care-connect-2-0-111.onrender.com/api/caregivers/${caregiverId}/details`,
        {
          method: "POST",
          headers: {
