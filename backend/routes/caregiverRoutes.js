@@ -1,36 +1,55 @@
 const express = require("express");
+
 const router = express.Router();
+
+const authMiddleware = require("../middleware/authMiddleware");
 
 const {
     getAllCaregivers,
     getCaregiverById,
-    createCaregiver
+    createCaregiver,
+    addCaregiverDetails
 } = require("../controllers/caregiverController");
 
-const {
-    addCaregiverDetailsd
-} = require("../controllers/caregiverDetailsController");
-
-const authMiddleware = require("../middleware/authMiddleware");
 
 // =========================================
-// CAREGIVER ROUTES
+// GET ALL / SEARCH CAREGIVERS
+// GET /api/caregivers
 // =========================================
 
-// Get all caregivers
 router.get("/", getAllCaregivers);
 
-// Get one caregiver
+
+// =========================================
+// GET CAREGIVER BY ID
+// GET /api/caregivers/:id
+// =========================================
+
 router.get("/:id", getCaregiverById);
 
-// Create caregiver profile
-router.post("/", authMiddleware, createCaregiver);
 
-// Add services, expertise, languages & working days
+// =========================================
+// CREATE CAREGIVER PROFILE
+// POST /api/caregivers
+// =========================================
+
+router.post(
+    "/",
+    authMiddleware,
+    createCaregiver
+);
+
+
+// =========================================
+// ADD CAREGIVER DETAILS
+// POST /api/caregivers/:id/details
+// =========================================
+
 router.post(
     "/:id/details",
     authMiddleware,
     addCaregiverDetails
 );
+
 
 module.exports = router;

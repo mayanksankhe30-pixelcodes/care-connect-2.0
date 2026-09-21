@@ -397,9 +397,9 @@ const createCaregiver = async (req, res) => {
 // =========================================
 // EXPORT
 // =========================================
-
 module.exports = {
     getAllCaregivers,
     getCaregiverById,
-    createCaregiver
+    createCaregiver,
+    addCaregiverDetails: createCaregiver
 };
