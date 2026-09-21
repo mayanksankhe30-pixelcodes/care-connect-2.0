@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import type { ChangeEvent, FormEvent } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
@@ -133,6 +133,11 @@ function CaregiverSignup() {
     confirmPassword: "",
   });
 
+  // Keep the latest city and price values available immediately on submit.
+  // This prevents the first final click from reading an older React state value.
+  const cityRef = useRef("");
+  const priceRef = useRef("");
+
   const [expertise, setExpertise] = useState("");
   const [services, setServices] = useState<string[]>([]);
   const [languages, setLanguages] = useState<string[]>([]);
@@ -171,6 +176,14 @@ function CaregiverSignup() {
     field: keyof FormData,
     value: string
   ) => {
+    if (field === "city") {
+      cityRef.current = value;
+    }
+
+    if (field === "price") {
+      priceRef.current = value;
+    }
+
     setForm((previous) => ({
       ...previous,
       [field]: value,
@@ -328,6 +341,22 @@ function CaregiverSignup() {
 
    const password = form.password;
    const email = form.email.trim().toLowerCase();
+
+   // Read the latest values directly so the first submission cannot use
+   // stale city/price state.
+   const currentCity = (cityRef.current || form.city).trim();
+   const currentPrice = priceRef.current || form.price;
+
+   if (!currentCity) {
+     setError("Please enter your city / location.");
+     return;
+   }
+
+   if (!currentPrice || Number(currentPrice) <= 0) {
+     setError("Please enter a valid price per slot.");
+     return;
+   }
+
    const baseUrl = "https://care-connect-2-0-111.onrender.com";
 
    try {
