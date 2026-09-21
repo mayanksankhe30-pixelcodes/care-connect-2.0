@@ -326,13 +326,16 @@ function CaregiverSignup() {
 
    setError("");
 
-   // The caregiver creates their own password during signup.
    const password = form.password;
+   const email = form.email.trim().toLowerCase();
+   const baseUrl = "https://care-connect-2-0-111.onrender.com";
 
    try {
-     // 1. Register caregiver account in the backend.
+     // 1. Create the account.
+     // If the account was already created during an earlier attempt,
+     // continue with login instead of showing "Email already registered".
      const registerResponse = await fetch(
-       "https://care-connect-2-0-111.onrender.com/api/auth/register",
+       `${baseUrl}/api/auth/register`,
        {
          method: "POST",
          headers: {
@@ -340,7 +343,7 @@ function CaregiverSignup() {
          },
          body: JSON.stringify({
            name: form.name.trim(),
-           email: form.email.trim(),
+           email,
            phone: form.phone.trim(),
            password,
            role: "caregiver",
@@ -358,14 +361,14 @@ function CaregiverSignup() {
 
      // 2. Login and obtain a fresh JWT.
      const loginResponse = await fetch(
-       "https://care-connect-2-0-111.onrender.com/api/auth/login",
+       `${baseUrl}/api/auth/login`,
        {
          method: "POST",
          headers: {
            "Content-Type": "application/json",
          },
          body: JSON.stringify({
-           email: form.email.trim(),
+           email,
            password,
          }),
        }
@@ -376,7 +379,7 @@ function CaregiverSignup() {
      if (!loginResponse.ok) {
        throw new Error(
          loginData.message ||
-           "Caregiver account was created, but login failed."
+           "Your account exists, but login failed. Please check your password."
        );
      }
 
@@ -396,8 +399,9 @@ function CaregiverSignup() {
      localStorage.setItem("token", token);
 
      // 3. Create the caregiver profile in MySQL.
+     // IMPORTANT: backend expects "qualifications" (plural).
      const caregiverResponse = await fetch(
-       "https://care-connect-2-0-111.onrender.com/api/caregivers",
+       `${baseUrl}/api/caregivers`,
        {
          method: "POST",
          headers: {
@@ -405,33 +409,67 @@ function CaregiverSignup() {
            Authorization: `Bearer ${token}`,
          },
          body: JSON.stringify({
-           name: form.name.trim(),
            city: form.city.trim(),
-           experience: Number(form.experience),
-           qualification: form.qualifications.trim(),
-           price: Number(form.price),
+           experience: Number(form.experience) || 0,
+           qualifications: form.qualifications.trim(),
            bio: form.bio.trim(),
+           price: Number(form.price),
+           photo_url: photo,
            start_time: `${form.startTime}:00`,
            end_time: `${form.endTime}:00`,
-           photo_url: photo,
+           availability_status: "Available for bookings",
          }),
        }
      );
 
      const caregiverData = await caregiverResponse.json().catch(() => ({}));
 
-     if (!caregiverResponse.ok) {
-       throw new Error(
-         caregiverData.message || "Caregiver profile creation failed."
-       );
-     }
-
-     const caregiverId =
+     let caregiverId =
        caregiverData.caregiver?.id ??
        caregiverData.data?.caregiver?.id ??
        caregiverData.data?.id ??
        caregiverData.id ??
        caregiverData.caregiver_id;
+
+     // If this account already has a caregiver profile, do not try to create
+     // another one. Find the existing profile and continue to the dashboard.
+     if (caregiverResponse.status === 409) {
+       const allCaregiversResponse = await fetch(
+         `${baseUrl}/api/caregivers`
+       );
+
+       const allCaregiversData = await allCaregiversResponse
+         .json()
+         .catch(() => ({}));
+
+       if (!allCaregiversResponse.ok) {
+         throw new Error(
+           allCaregiversData.message ||
+             "Your account exists, but the caregiver profile could not be loaded."
+         );
+       }
+
+       const caregiverList = Array.isArray(allCaregiversData.caregivers)
+         ? allCaregiversData.caregivers
+         : [];
+
+       const existingCaregiver = caregiverList.find(
+         (item: { email?: string }) =>
+           String(item.email || "").toLowerCase() === email
+       );
+
+       caregiverId = existingCaregiver?.caregiver_id ?? existingCaregiver?.id;
+
+       if (!caregiverId) {
+         throw new Error(
+           "Caregiver profile already exists, but it could not be loaded."
+         );
+       }
+     } else if (!caregiverResponse.ok) {
+       throw new Error(
+         caregiverData.message || "Caregiver profile creation failed."
+       );
+     }
 
      if (!caregiverId) {
        throw new Error(
@@ -439,38 +477,42 @@ function CaregiverSignup() {
        );
      }
 
-     // 4. Save services, expertise, languages and working days.
-     const detailsResponse = await fetch(
-       `https://care-connect-2-0-111.onrender.com/api/caregivers/${caregiverId}/details`,
-       {
-         method: "POST",
-         headers: {
-           "Content-Type": "application/json",
-           Authorization: `Bearer ${token}`,
-         },
-         body: JSON.stringify({
-           services,
-           expertise: expertise ? [expertise] : [],
-           languages,
-           working_days: days,
-         }),
-       }
-     );
-
-     const detailsData = await detailsResponse.json().catch(() => ({}));
-
-     if (!detailsResponse.ok) {
-       throw new Error(
-         detailsData.message || "Caregiver details could not be saved."
+     // 4. Save services, expertise, languages and working days only when
+     // this is a newly created profile. Existing profiles must not receive
+     // duplicate detail rows.
+     if (caregiverResponse.status !== 409) {
+       const detailsResponse = await fetch(
+         `${baseUrl}/api/caregivers/${caregiverId}/details`,
+         {
+           method: "POST",
+           headers: {
+             "Content-Type": "application/json",
+             Authorization: `Bearer ${token}`,
+           },
+           body: JSON.stringify({
+             services,
+             expertise: expertise ? [expertise] : [],
+             languages,
+             working_days: days,
+           }),
+         }
        );
+
+       const detailsData = await detailsResponse.json().catch(() => ({}));
+
+       if (!detailsResponse.ok) {
+         throw new Error(
+           detailsData.message || "Caregiver details could not be saved."
+         );
+       }
      }
 
-     // 5. Keep localStorage data so the existing frontend dashboard
-     // continues to work without breaking the current UI.
+     // 5. Keep the existing localStorage behaviour so the current frontend
+     // dashboard continues to work without changing the rest of the UI.
      const caregiver = {
        id: caregiverId,
        name: form.name.trim(),
-       email: form.email.trim(),
+       email,
        phone: form.phone.trim(),
        city: form.city.trim(),
        experience: form.experience,
@@ -508,11 +550,9 @@ function CaregiverSignup() {
        caregivers = [];
      }
 
-     // Remove an older local copy with the same email.
      caregivers = caregivers.filter(
        (item) =>
-         String(item.email || "").toLowerCase() !==
-         form.email.trim().toLowerCase()
+         String(item.email || "").toLowerCase() !== email
      );
 
      caregivers.push(caregiver);
