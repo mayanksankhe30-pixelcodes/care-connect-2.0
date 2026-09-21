@@ -12,19 +12,29 @@ const adminRoutes = require("./routes/adminRoutes");
 
 const app = express();
 
-// Middleware
+// =========================================
+// MIDDLEWARE
+// =========================================
+
 app.use(cors());
 app.use(express.json());
 
-// Basic test route
+// =========================================
+// BASIC TEST ROUTE
+// =========================================
+
 app.get("/", (req, res) => {
   res.send("Care-Connect Backend is running!");
 });
 
-// Health check
+// =========================================
+// HEALTH CHECK
+// =========================================
+
 app.get("/api/health", async (req, res) => {
   try {
     const pool = require("./config/db");
+
     await pool.query("SELECT 1");
 
     res.json({
@@ -41,7 +51,10 @@ app.get("/api/health", async (req, res) => {
   }
 });
 
-// API Routes
+// =========================================
+// API ROUTES
+// =========================================
+
 app.use("/api/auth", authRoutes);
 app.use("/api/caregivers", caregiverRoutes);
 app.use("/api/bookings", bookingRoutes);
@@ -50,9 +63,12 @@ app.use("/api/payments", paymentRoutes);
 app.use("/api/reviews", reviewRoutes);
 app.use("/api/admin", adminRoutes);
 
-// Server
+// =========================================
+// SERVER
+// =========================================
+
 const PORT = process.env.PORT || 5000;
 
-app.listen(PORT, () => {
+app.listen(PORT, "0.0.0.0", () => {
   console.log(`Server running on port ${PORT}`);
 });
