@@ -12,67 +12,20 @@ function Signup() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const isValidEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.trim());
+  const isValidEmail = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email.trim());
 
   const canCreateAccount =
     name.trim().length >= 2 &&
     isValidEmail &&
     password.length >= 6;
 
-  const handleCreateAccount = async () => {
-    if (!canCreateAccount || !role) return;
+  const handleCreateAccount = () => {
+    if (!canCreateAccount) return;
 
-    try {
-      const response = await fetch(
-       "https://care-connect-2-0-111.onrender.com/api/auth/register",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: name.trim(),
-            email: email.trim(),
-            password,
-            role,
-          }),
-        }
-      );
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        alert(data.message || "Registration failed");
-        return;
-      }
-
-      // Pass the registered account information to the next step.
-      if (role === "caregiver") {
-        navigate("/signup/caregiver", {
-          state: {
-            name: name.trim(),
-            email: email.trim(),
-            password,
-            user: data.user,
-            token: data.token,
-          },
-        });
-      } else {
-        navigate("/careRequirement", {
-          state: {
-            name: name.trim(),
-            email: email.trim(),
-            password,
-            user: data.user,
-            token: data.token,
-          },
-        });
-      }
-    } catch (error) {
-      console.error("Registration error:", error);
-      alert(
-        "Unable to connect to the Care-Connect backend. Make sure the backend server is running."
-      );
+    if (role === "caregiver") {
+      navigate("/signup/caregiver");
+    } else {
+      navigate("/careRequirement");
     }
   };
 
@@ -168,6 +121,7 @@ function Signup() {
       >
 
         {/* Logo */}
+
         <button
           type="button"
           onClick={() => navigate("/")}
@@ -181,6 +135,7 @@ function Signup() {
         </button>
 
         {/* Login */}
+
         <button
           type="button"
           onClick={() => navigate("/login")}
@@ -232,7 +187,10 @@ function Signup() {
               className="w-full"
             >
 
-              {/* Heading */}
+              {/* =================================================
+                  HEADING
+              ================================================== */}
+
               <div className="mx-auto mb-12 max-w-3xl text-center">
 
                 <motion.div
@@ -298,10 +256,16 @@ function Signup() {
 
               </div>
 
-              {/* ROLE CARDS */}
+              {/* =================================================
+                  ROLE CARDS
+              ================================================== */}
+
               <div className="mx-auto grid max-w-5xl gap-6 md:grid-cols-2">
 
-                {/* CARE SEEKER */}
+                {/* =================================================
+                    CARE SEEKER
+                ================================================== */}
+
                 <motion.button
                   type="button"
                   onClick={() => navigate("/signup/seeker")}
@@ -328,9 +292,13 @@ function Signup() {
                   className="group relative overflow-hidden rounded-[2rem] border border-[#d8c19d]/10 bg-[#d8c19d]/[0.025] p-8 text-left backdrop-blur-2xl transition-all duration-500 hover:border-[#d8c19d]/30 hover:bg-[#d8c19d]/[0.045] hover:shadow-[0_25px_80px_rgba(201,166,107,0.10)] sm:p-10"
                 >
 
+                  {/* Glow */}
+
                   <div className="absolute -right-20 -top-20 h-60 w-60 rounded-full bg-[#c9a66b]/[0.08] blur-[70px] transition-all duration-700 group-hover:bg-[#c9a66b]/[0.16]" />
 
                   <div className="relative">
+
+                    {/* Icon */}
 
                     <motion.div
                       whileHover={{
@@ -358,6 +326,8 @@ function Signup() {
                       care requirements, availability, experience and cost.
                     </p>
 
+                    {/* Benefits */}
+
                     <div className="mt-7 space-y-2.5">
 
                       <div className="flex items-center gap-3 text-sm text-[#f4efe7]/55">
@@ -383,6 +353,8 @@ function Signup() {
 
                     </div>
 
+                    {/* Continue */}
+
                     <div className="mt-8 flex items-center gap-2 text-sm font-medium text-[#d8c19d] transition-all duration-300 group-hover:gap-4">
                       Continue as Care Seeker
 
@@ -401,12 +373,16 @@ function Signup() {
                     </div>
 
                   </div>
+
                 </motion.button>
 
-                {/* CAREGIVER */}
+                {/* =================================================
+                    CAREGIVER
+                ================================================== */}
+
                 <motion.button
                   type="button"
-                  onClick={() => setRole("caregiver")}
+                  onClick={() => navigate("/signup/caregiver")}
                   initial={{
                     opacity: 0,
                     x: 70,
@@ -430,9 +406,13 @@ function Signup() {
                   className="group relative overflow-hidden rounded-[2rem] border border-[#aab6a2]/10 bg-[#aab6a2]/[0.025] p-8 text-left backdrop-blur-2xl transition-all duration-500 hover:border-[#aab6a2]/30 hover:bg-[#aab6a2]/[0.045] hover:shadow-[0_25px_80px_rgba(170,182,162,0.10)] sm:p-10"
                 >
 
+                  {/* Glow */}
+
                   <div className="absolute -left-20 -top-20 h-60 w-60 rounded-full bg-[#9baa91]/[0.07] blur-[70px] transition-all duration-700 group-hover:bg-[#9baa91]/[0.15]" />
 
                   <div className="relative">
+
+                    {/* Icon */}
 
                     <motion.div
                       whileHover={{
@@ -460,6 +440,8 @@ function Signup() {
                       set your pricing and connect with people who need care.
                     </p>
 
+                    {/* Benefits */}
+
                     <div className="mt-7 space-y-2.5">
 
                       <div className="flex items-center gap-3 text-sm text-[#f4efe7]/55">
@@ -485,6 +467,8 @@ function Signup() {
 
                     </div>
 
+                    {/* Continue */}
+
                     <div className="mt-8 flex items-center gap-2 text-sm font-medium text-[#aab6a2] transition-all duration-300 group-hover:gap-4">
                       Continue as Caregiver
 
@@ -503,6 +487,7 @@ function Signup() {
                     </div>
 
                   </div>
+
                 </motion.button>
 
               </div>
@@ -510,7 +495,10 @@ function Signup() {
             </motion.div>
           )}
 
-          {/* SELECTED ROLE */}
+          {/* =================================================
+              SELECTED ROLE
+          ================================================== */}
+
           {role && (
             <motion.div
               key="selected-role"
@@ -536,6 +524,7 @@ function Signup() {
             >
 
               {/* Role Icon */}
+
               <motion.div
                 initial={{
                   scale: 0,
@@ -559,6 +548,7 @@ function Signup() {
               </motion.div>
 
               {/* Heading */}
+
               <div className="mb-8 text-center">
 
                 <p
@@ -591,7 +581,10 @@ function Signup() {
 
               </div>
 
-              {/* FORM */}
+              {/* =================================================
+                  FORM
+              ================================================== */}
+
               <motion.div
                 initial={{
                   opacity: 0,
@@ -611,6 +604,7 @@ function Signup() {
                 <div className="space-y-5">
 
                   {/* Name */}
+
                   <div>
                     <label className="mb-2 block text-sm text-[#f4efe7]/70">
                       Full Name
@@ -626,6 +620,7 @@ function Signup() {
                   </div>
 
                   {/* Email */}
+
                   <div>
                     <label className="mb-2 block text-sm text-[#f4efe7]/70">
                       Email
@@ -641,6 +636,7 @@ function Signup() {
                   </div>
 
                   {/* Password */}
+
                   <div>
                     <label className="mb-2 block text-sm text-[#f4efe7]/70">
                       Password
@@ -660,28 +656,26 @@ function Signup() {
                   </div>
 
                   {/* Create Account */}
+
                   <motion.button
-                    type="button"
-                    onClick={handleCreateAccount}
-                    disabled={!canCreateAccount}
-                    whileHover={
-                      canCreateAccount
-                        ? {
-                            scale: 1.02,
-                            boxShadow:
-                              "0 15px 45px rgba(170,181,158,0.25)",
-                          }
-                        : undefined
-                    }
-                    whileTap={
-                      canCreateAccount ? { scale: 0.97 } : undefined
-                    }
-                    className={`group relative w-full overflow-hidden rounded-xl py-4 font-medium transition-all ${
-                      canCreateAccount
-                        ? "bg-[#cdbb9c] text-[#15140f] shadow-[0_10px_35px_rgba(205,187,156,0.15)]"
-                        : "cursor-not-allowed bg-white/[0.08] text-[#f4efe7]/25"
-                    }`}
-                  >
+  type="button"
+  onClick={handleCreateAccount}
+  disabled={!canCreateAccount}
+  whileHover={
+    canCreateAccount
+      ? {
+          scale: 1.02,
+          boxShadow: "0 15px 45px rgba(170,181,158,0.25)",
+        }
+      : undefined
+  }
+  whileTap={canCreateAccount ? { scale: 0.97 } : undefined}
+  className={`group relative w-full overflow-hidden rounded-xl py-4 font-medium transition-all ${
+    canCreateAccount
+      ? "bg-[#cdbb9c] text-[#15140f] shadow-[0_10px_35px_rgba(205,187,156,0.15)]"
+      : "cursor-not-allowed bg-white/[0.08] text-[#f4efe7]/25"
+  }`}
+>
 
                     <span className="relative z-10">
                       Create{" "}
@@ -691,7 +685,7 @@ function Signup() {
                       Account →
                     </span>
 
-                    {/* Animated shine */}
+                    {/* Animated shine — only when the form is valid */}
                     {canCreateAccount && (
                       <motion.div
                         className="absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/25 to-transparent"
@@ -713,6 +707,7 @@ function Signup() {
               </motion.div>
 
               {/* Change Role */}
+
               <motion.button
                 type="button"
                 onClick={() => setRole(null)}
