@@ -267,7 +267,21 @@ function Search() {
           (caregiver: any) => ({
             id: String(caregiver.caregiver_id),
             name: caregiver.name,
-            specialization: caregiver.specialization || "Elderly Care",
+            specialization: (() => {
+              const rawSpecialization =
+                caregiver.specialization ||
+                (Array.isArray(caregiver.expertise) ? caregiver.expertise[0] : caregiver.expertise);
+
+              const normalizedSpecialization = String(rawSpecialization || "")
+                .trim()
+                .toLowerCase();
+
+              return (
+                SPECIALIZATIONS.find(
+                  (option) => option.toLowerCase() === normalizedSpecialization
+                ) || "Elderly Care"
+              );
+            })(),
             location: caregiver.city || "",
             experience: Number(caregiver.experience) || 0,
             rating: Number(caregiver.rating) || 0,
