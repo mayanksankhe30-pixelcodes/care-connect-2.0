@@ -6,6 +6,7 @@ import {
   useState,
 } from "react";
 import Globe from "./globe";
+import { AnimatePresence, motion } from "framer-motion";
 import { cn } from "../../lib/utils";
 
 interface ScrollGlobeProps {
@@ -335,6 +336,126 @@ function CareNetworkBackground() {
     />
   );
 }
+
+/* ============================================================
+   CAREGIVER / CLIENT HERO SHOWCASE
+   Automatically cycles through the types of care offered by
+   Care-Connect so visitors immediately understand the product.
+   ============================================================ */
+function CaregiverShowcase() {
+  const careScenes = [
+    {
+      title: "Elderly Care",
+      subtitle: "A caregiver helping a senior at home",
+      image:
+        "https://img77.uenicdn.com/image/upload/v1709814377/business/8bd0d0e3895645a0af65dfaa289fd076.jpg",
+    },
+    {
+      title: "Patient Care",
+      subtitle: "Support for recovery and daily assistance",
+      image:
+        "https://app.nurseg.in/blog-images/elderly-caretaker.png",
+    },
+    {
+      title: "Child Care",
+      subtitle: "Safe and attentive support for children",
+      image:
+        "https://www.caritas-ooe.at/fileadmin/_processed_/6/2/csm_therapien_bee7d80204.jpg",
+    },
+    {
+      title: "Family Support",
+      subtitle: "Compassionate help where families need it",
+      image:
+        "https://images.squarespace-cdn.com/content/v1/66043e81d5d1e33cf90a81ab/53e511d7-0978-46d4-b17d-d55889f805d8/467F8360-740C-42A0-9183-8FB87CB2D256.jpeg",
+    },
+  ];
+
+  const [activeScene, setActiveScene] = useState(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setActiveScene((current) => (current + 1) % careScenes.length);
+    }, 4000);
+
+    return () => window.clearInterval(timer);
+  }, [careScenes.length]);
+
+  const scene = careScenes[activeScene];
+
+  return (
+    <div className="relative mt-12 w-full max-w-[560px] lg:mt-0 lg:max-w-[620px]">
+      <div className="absolute -inset-5 rounded-[2.5rem] bg-emerald-700/10 blur-3xl" />
+
+      <div className="relative overflow-hidden rounded-[2rem] border border-white/70 bg-white/60 p-2 shadow-[0_25px_80px_rgba(45,90,67,0.14)] backdrop-blur-xl">
+        <div className="relative aspect-[4/3] overflow-hidden rounded-[1.5rem] bg-stone-200">
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={scene.image}
+              src={scene.image}
+              alt={`${scene.title} - ${scene.subtitle}`}
+              className="absolute inset-0 h-full w-full object-cover"
+              initial={{ opacity: 0, scale: 1.06 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.98 }}
+              transition={{ duration: 0.8, ease: "easeInOut" }}
+            />
+          </AnimatePresence>
+
+          <div className="absolute inset-0 bg-gradient-to-t from-stone-950/65 via-transparent to-transparent" />
+
+          <div className="absolute left-5 top-5 flex items-center gap-2 rounded-full border border-white/25 bg-stone-950/35 px-3.5 py-2 text-xs font-medium text-white backdrop-blur-md">
+            <span className="h-2 w-2 animate-pulse rounded-full bg-emerald-300" />
+            Care-Connect
+          </div>
+
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={scene.title}
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -8 }}
+              transition={{ duration: 0.45 }}
+              className="absolute bottom-5 left-5 right-5"
+            >
+              <p className="text-xs font-semibold uppercase tracking-[0.18em] text-emerald-200">
+                {scene.title}
+              </p>
+              <p className="mt-1 text-sm text-white/90 sm:text-base">
+                {scene.subtitle}
+              </p>
+            </motion.div>
+          </AnimatePresence>
+        </div>
+
+        <div className="flex items-center justify-between gap-4 px-3 pb-2 pt-3 sm:px-4">
+          <div>
+            <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-stone-400">
+              Care that connects
+            </p>
+            <p className="mt-1 text-xs text-stone-600">
+              Discover care for every stage of life.
+            </p>
+          </div>
+
+          <div className="flex gap-1.5" aria-label="Care types">
+            {careScenes.map((item, index) => (
+              <span
+                key={item.title}
+                className={cn(
+                  "h-1.5 rounded-full transition-all duration-500",
+                  index === activeScene
+                    ? "w-7 bg-emerald-700"
+                    : "w-1.5 bg-stone-300"
+                )}
+              />
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 const lightAtmosphereKeyframes = `
   @keyframes organicMorph1 {
     0%, 100% {
@@ -1091,6 +1212,7 @@ export default function CareConnectLanding({
           className={cn(
             "relative z-20 flex min-h-screen w-full flex-col justify-center",
             "px-5 py-20 sm:px-8 lg:px-16",
+            index === 0 && "lg:flex-row lg:items-center lg:gap-16",
             section.align === "center" &&
               "items-center text-center",
             section.align === "right" &&
@@ -1339,6 +1461,8 @@ export default function CareConnectLanding({
               </div>
             )}
           </div>
+
+          {index === 0 && <CaregiverShowcase />}
         </section>
       ))}
     </main>
